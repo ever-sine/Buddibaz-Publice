@@ -1,7 +1,9 @@
 'use strict';
 const el = id => document.getElementById(id);
 const keys = ['A','B','C','D'];
-const publicShowCode=new URLSearchParams(location.search).get('show')||'';
+let publicShowCode=new URLSearchParams(location.search).get('show')||'';
+let showWatcher=null;
+let lastKnownShow='';
 let sessionCsrf = '';
 let serverClockOffset = 0;
 let lastView = null;
@@ -212,8 +214,51 @@ el('pubLogoutBtn').addEventListener('click',async () => {
   sessionCsrf='';lastView=null;currentRoundId='';el('pubLiveRanking').hidden=false;showLogin(true);
 });
 countdownInterval=setInterval(updateTimer,120);
+async function checkCurrentShow() {
+  try {
+    const info=await jsonRequest('/api/public/current');
+    const code=(info.active && info.showCode)||'';
+    if (!code) {
+      if (publicShowCode) {
+        publicShowCode=''; sessionCsrf=''; lastView=null;
+        if (livePoll) {clearInterval(livePoll);livePoll=null;}
+        showLogin(true);
+      }
+      showLoginError('Show is offline. Waiting for the host to start a show…');
+      el('joinQuizBtn').disabled=true;
+      return;
+    }
+    if (code!==publicShowCode) {
+      publicShowCode=code; sessionCsrf=''; lastView=null;
+      if (livePoll) {clearInterval(livePoll);livePoll=null;}
+      showLogin(true);
+      showLoginError('');
+      el('joinQuizBtn').disabled=false;
+      try {
+        const data=await jsonRequest('/api/public/me?show='+encodeURIComponent(publicShowCode));
+        sessionCsrf=data.csrfToken;render(data);connectLive();
+      } catch (_) { /* participant must login for the new show */ }
+    }
+  } catch (_) {
+    if (!publicShowCode) showLoginError('Connecting to the quiz server…');
+  }
+}
 (async()=>{
-  if(!/^[A-Za-z0-9_-]{20,40}$/.test(publicShowCode)){showLogin(true);showLoginError('Invalid Public Show link. Request a new invitation.');el('joinQuizBtn').disabled=true;return;}
+  if (!publicShowCode) {
+    showLogin(true);el('joinQuizBtn').disabled=true;
+    await checkCurrentShow();
+    showWatcher=setInterval(checkCurrentShow,5000);
+    return;
+  }
+  showWatcher=setInterval(checkCurrentShow,5000);
+  await checkCurrentShow();
+  if(!/^[A-Za-z0-9_-]{20,40}$/.test(publicShowCode)){
+    // An obsolete or malformed invitation must not block the permanent URL.
+    publicShowCode=''; showLogin(true); el('joinQuizBtn').disabled=true;
+    showLoginError('Connecting to the current show…');
+    await checkCurrentShow();
+    return;
+  }
   try {const data=await jsonRequest('/api/public/me?show='+encodeURIComponent(publicShowCode));sessionCsrf=data.csrfToken;render(data);connectLive();}
   catch(_) {showLogin(true);}
 })();

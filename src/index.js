@@ -1,5 +1,5 @@
-const ROUTES = new Set(["login", "me", "answer", "logout"]);
-const METHODS = { login: "POST", me: "GET", answer: "POST", logout: "POST" };
+const ROUTES = new Set(["login", "me", "answer", "logout", "current"]);
+const METHODS = { login: "POST", me: "GET", answer: "POST", logout: "POST", current: "GET" };
 
 function jsonError(status, message) {
   return new Response(JSON.stringify({ ok: false, error: message }), {
@@ -39,7 +39,7 @@ async function proxyPublicApi(request, env, route) {
     "ngrok-skip-browser-warning": "true",
     "X-Forwarded-Proto": "https"
   });
-  if (route !== "me") headers.set("Content-Type", "application/json");
+  if (route !== "me" && route !== "current") headers.set("Content-Type", "application/json");
   const csrf = request.headers.get("X-CSRF-Token");
   if (csrf) headers.set("X-CSRF-Token", csrf);
   const session = sessionCookieFrom(request);
@@ -48,7 +48,7 @@ async function proxyPublicApi(request, env, route) {
   // this trusted server-to-server proxy request rather than a cross-origin browser POST.
 
   let body;
-  if (route !== "me") {
+  if (route !== "me" && route !== "current") {
     body = await request.text();
     if (body.length > 8192) return jsonError(413, "Request too large");
   }
@@ -79,7 +79,7 @@ async function proxyPublicApi(request, env, route) {
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
-    const m = url.pathname.match(/^\/api\/public\/(login|me|answer|logout)\/?$/);
+    const m = url.pathname.match(/^\/api\/public\/(login|me|answer|logout|current)\/?$/);
     if (m) return proxyPublicApi(request, env, m[1]);
     return env.ASSETS.fetch(request);
   }
