@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#071125">
+  <meta name="description" content="Buddhibaz Public Quiz – play the live 30-second question from your phone or tablet.">
+  <title>Public Dashboard | BUDDHIBAAZ</title>
+  <link rel="icon" href="/app-icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/public-dashboard.css?v=32.0">
+</head>
+<body>
+  <div class="background-grid" aria-hidden="true"></div>
+  <main class="public-shell">
+    <header class="pub-header">
+      <div class="pub-brand"><div class="pub-logo">B</div><div><strong>BUDDHIBAAZ</strong><span>PUBLIC DASHBOARD</span></div></div>
+      <span class="pub-live"><i></i> LIVE QUIZ</span>
+    </header>
+
+    <section class="login-card glass" id="loginView">
+      <div class="intro-icon" aria-hidden="true">✦</div>
+      <span class="eyebrow">WELCOME TO BUDDHIBAZ</span>
+      <h1>Join the Live Quiz</h1>
+      <p class="intro-text">Enter your details to participate in the 30-second quiz rounds.</p>
+      <form id="publicLoginForm" autocomplete="off">
+        <label class="pub-field">Full Name <span>Participant name</span>
+          <input type="text" id="pubName" name="name" autocomplete="name" placeholder="Enter your full name" minlength="2" maxlength="70" required>
+        </label>
+        <label class="pub-field">Mobile Number <span>10 digits</span>
+          <input type="tel" id="pubPhone" name="participantMobile" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="" inputmode="numeric" pattern="[6-9][0-9]{9}" maxlength="10" placeholder="Enter 10-digit mobile number" required>
+        </label>
+        <label class="pub-field">Age <span>7–50 years</span>
+          <select id="pubAge" required><option value="">Select Age</option></select>
+        </label>
+        <label class="check-consent" id="guardianConsentRow" hidden><input id="pubGuardianConsent" type="checkbox"><span>I confirm that a parent or guardian has consented to this minor’s participation and data collection.</span></label>
+        <label class="check-consent"><input id="pubPrivacyConsent" type="checkbox" required><span>I consent to the organizer recording my name, mobile number, age and quiz responses.</span></label>
+        <div class="privacy-note">No OTP verification. Participants under 18 must use a guardian-approved number and have guardian consent. Participant details are not visible to other players.</div>
+        <div id="loginError" class="pub-error" role="alert" hidden></div>
+        <button class="pub-primary-btn" id="joinQuizBtn" type="submit">JOIN QUIZ <span>→</span></button>
+      </form>
+    </section>
+
+    <section class="participant-app" id="participantView" hidden>
+      <div class="player-bar glass"><div class="player-mark">✦</div><div class="player-greeting"><span>WELCOME PLAYER</span><strong id="playerName">—</strong></div><button class="logout-button" id="pubLogoutBtn" type="button">Logout</button></div>
+      <section class="bb-public-ranking glass" id="pubLiveRanking" aria-label="Live Top 3" aria-live="polite">
+        <div class="bb-rank-head"><span><span class="bb-rank-indicator"></span> LIVE RANKING</span><strong>TOP 3</strong></div>
+        <div class="bb-rank-grid" id="pubRankGrid">
+          <div class="bb-rank-entry" data-rank="1"><b>1ST</b><span>Awaiting results</span><small>—</small></div>
+          <div class="bb-rank-entry" data-rank="2"><b>2ND</b><span>Awaiting results</span><small>—</small></div>
+          <div class="bb-rank-entry" data-rank="3"><b>3RD</b><span>Awaiting results</span><small>—</small></div>
+        </div>
+        <p class="bb-rank-footer"><span id="pubMyPosition">YOUR RANK —</span><span>LIVE STANDINGS · NOT FINAL</span></p>
+      </section>
+      <section class="waiting-card glass" id="waitingView" aria-live="polite"><div class="waiting-illustration" id="waitingIcon">◎</div><span class="eyebrow" id="waitingTag">LIVE QUIZ</span><h2 id="waitingTitle">Waiting for the Next Question</h2><p id="waitingDescription">The next round will appear here when the host publishes it.</p><div class="pulsing-pips"><b></b><b></b><b></b></div></section>
+      <section class="quiz-card glass" id="quizView" hidden>
+        <div class="quiz-topline"><div class="quiz-label"><span class="small-glow"></span> LIVE QUESTION <strong id="pubQuestionTitle"></strong></div><div class="quiz-timer" id="quizTimer" aria-label="Time remaining"><svg class="timer-ring" viewBox="0 0 56 56"><circle class="ring-track" cx="28" cy="28" r="24"/><circle class="ring-progress" id="timerRing" cx="28" cy="28" r="24"/></svg><strong id="timeLeft">30</strong><small>SEC</small></div></div>
+        <div class="question-panel"><div class="q-label">QUESTION</div><h1 id="pubQuestionText"></h1><p id="pubQuestionEnglish" hidden></p></div>
+        <div class="option-grid" id="pubOptions" role="radiogroup" aria-label="Select one answer option"></div>
+        <p class="selection-hint">Select one answer and submit before time expires.</p>
+        <div id="answerError" class="pub-error" role="alert" hidden></div>
+        <button type="button" class="pub-primary-btn answer-submit" id="pubSubmitBtn" disabled>SUBMIT ANSWER <span>→</span></button>
+      </section>
+      <section class="bb-public-final" id="pubFinalView" aria-live="assertive" hidden>
+        <div class="bb-final-sparks" aria-hidden="true">✦ <span>✦</span> ✦ <span>✦</span> ✦</div>
+        <div class="bb-final-trophy" id="pubFinalSymbol" aria-hidden="true">🏆</div>
+        <div class="bb-final-status" id="pubFinalStatus">WINNER</div>
+        <h2 class="bb-final-name" id="pubFinalPlayer">—</h2>
+        <div class="bb-final-message" id="pubFinalMessage">Congratulations!</div>
+        <p class="bb-final-label">BBN7 STUDIO • BUDDHIBAZ PUBLIC SHOW</p>
+      </section>
+      <div class="connection-note" id="pubConnection">● Live connection starting...</div>
+    </section>
+    <footer class="pub-footer">BUDDHIBAZ QUIZ <span>•</span> POWERED BY BBN7 STUDIO</footer>
+  </main>
+  <script src="/public-dashboard.js?v=32.0" defer></script>
+</body>
+</html>
